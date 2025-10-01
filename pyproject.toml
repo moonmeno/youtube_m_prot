@@ -1,0 +1,26 @@
+[project]
+name = "youtube-m-prot"
+version = "0.1.0"
+description = "YouTube 데이터 수집 및 분석 프로토타입"
+authors = [{ name = "Prototype", email = "prototype@example.com" }]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.27.0",
+    "boto3>=1.34.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.5.0",
+    "mypy>=1.8.0",
+    "pytest>=8.0.0",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+
