@@ -40,7 +40,13 @@ def process_command(args: argparse.Namespace) -> None:
 def report_command(args: argparse.Namespace) -> None:
     """누적된 결과를 요약하여 출력한다."""
 
-    jobs.render_report(limit=args.limit)
+    results = jobs.render_report(limit=args.limit, channel_id=args.channel_id)
+    for idx, video in enumerate(results, start=1):
+        title = video.get("title") or "(제목 없음)"
+        video_id = video.get("videoId")
+        channel_id = video.get("channelId")
+        published_at = video.get("publishedAt")
+        print(f"[{idx}] {title} (videoId={video_id}, channelId={channel_id}, publishedAt={published_at})")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -60,6 +66,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     report_parser = subparsers.add_parser("report", help="결과 요약 출력")
     report_parser.add_argument("--limit", type=int, default=10, help="표시할 결과 수 제한")
+    report_parser.add_argument("--channel-id", help="특정 채널의 결과만 조회")
 
     return parser
 

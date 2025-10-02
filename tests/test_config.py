@@ -25,6 +25,7 @@ def _reset_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
         "DATA_BUCKET": os.getenv("DATA_BUCKET"),
         "AWS_REGION": os.getenv("AWS_REGION"),
+        "VIDEO_INDEX_TABLE": os.getenv("VIDEO_INDEX_TABLE"),
     }
 
     clear_cache()
@@ -46,6 +47,7 @@ def test_get_settings_returns_values(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "openai-key")
     monkeypatch.setenv("DATA_BUCKET", "my-bucket")
     monkeypatch.setenv("AWS_REGION", "us-west-2")
+    monkeypatch.setenv("VIDEO_INDEX_TABLE", "video-table")
     clear_cache()
 
     settings = get_settings()
@@ -54,6 +56,7 @@ def test_get_settings_returns_values(monkeypatch: pytest.MonkeyPatch) -> None:
     assert settings.openai_api_key == "openai-key"
     assert settings.default_bucket == "my-bucket"
     assert settings.aws_region == "us-west-2"
+    assert settings.video_index_table == "video-table"
 
 
 def test_get_settings_missing_required_env(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -62,6 +65,7 @@ def test_get_settings_missing_required_env(monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.delenv("YOUTUBE_API_KEY", raising=False)
     monkeypatch.setenv("OPENAI_API_KEY", "openai-key")
     monkeypatch.setenv("DATA_BUCKET", "my-bucket")
+    monkeypatch.setenv("VIDEO_INDEX_TABLE", "video-table")
     clear_cache()
 
     with pytest.raises(ValueError) as exc:

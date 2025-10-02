@@ -22,6 +22,7 @@ Python 기반으로 YouTube Data API, OpenAI API, AWS를 연동하는 실험용 
    export OPENAI_API_KEY=your_key
    export DATA_BUCKET=your_bucket
    export AWS_REGION=ap-northeast-2
+   export VIDEO_INDEX_TABLE=your_video_metadata_table
    ```
 
 ## 사용 예시

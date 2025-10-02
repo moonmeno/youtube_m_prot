@@ -51,11 +51,14 @@ def enqueue_process(request: ProcessRequest) -> Dict[str, Any]:
 
 
 @router.get("/report", summary="요약 결과 조회")
-def get_report(limit: int = Query(10, ge=1, le=100, description="표시할 결과 수")) -> Dict[str, Any]:
+def get_report(
+    limit: int = Query(10, ge=1, le=100, description="표시할 결과 수"),
+    channel_id: str | None = Query(None, description="특정 채널만 필터링"),
+) -> Dict[str, Any]:
     """단순 보고서 출력을 웹에 맞춰 래핑한 엔드포인트."""
 
-    jobs.render_report(limit=limit)
-    return {"rendered": True, "limit": limit}
+    videos = jobs.render_report(limit=limit, channel_id=channel_id)
+    return {"items": videos, "limit": limit, "channelId": channel_id}
 
 
 def create_app() -> FastAPI:

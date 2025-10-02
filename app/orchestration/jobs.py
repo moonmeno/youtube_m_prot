@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
-from typing import Dict, Optional
+from datetime import datetime, timezone
+from typing import Dict, List, Optional
 
+from app.storage import dynamodb as index_storage
 from app.storage import s3 as s3_storage
 from app.youtube import client as youtube_client
 
@@ -19,6 +20,7 @@ def enqueue_fetch_job(*, channel_id: str, force: bool = False) -> None:
 
     youtube = youtube_client.create_client()
     storage = s3_storage.create_storage()
+    metadata_index = index_storage.create_metadata_index()
 
     run_id = _generate_run_id()
     base_prefix = f"raw/channels/{channel_id}/{run_id}"
@@ -51,6 +53,12 @@ def enqueue_fetch_job(*, channel_id: str, force: bool = False) -> None:
             video_key = f"{base_prefix}/videos/{video_id}.json"
             storage.put_json(video_key, video)
             all_video_ids.append(video_id)
+            metadata_index.upsert_video(
+                channel_id=channel_id,
+                video_payload=video,
+                run_id=run_id,
+                stored_at=datetime.now(timezone.utc),
+            )
 
             _fetch_comments(
                 storage=storage,
@@ -80,16 +88,28 @@ def enqueue_process_job(*, video_id: str, segment: Optional[str] = None) -> None
     LOGGER.info("[stub] process job -> video_id=%s, segment=%s", video_id, segment)
 
 
-def render_report(*, limit: int = 10) -> None:
+def render_report(*, limit: int = 10, channel_id: Optional[str] = None) -> List[Dict[str, object]]:
     """간단한 결과 리포트를 출력한다."""
 
-    LOGGER.info("[stub] report -> limit=%d", limit)
+    metadata_index = index_storage.create_metadata_index()
+    videos = metadata_index.list_recent_videos(channel_id=channel_id, limit=limit)
+
+    for video in videos:
+        LOGGER.info(
+            "영상 요약: channel=%s video=%s title=%s published=%s",
+            video.get("channelId"),
+            video.get("videoId"),
+            video.get("title"),
+            video.get("publishedAt"),
+        )
+
+    return videos
 
 
 def _generate_run_id() -> str:
     """S3 경로에 사용할 수집 실행 ID를 생성한다."""
 
-    return datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
 
 def _fetch_comments(

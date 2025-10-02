@@ -16,6 +16,7 @@ class Settings:
     openai_api_key: str
     aws_region: str = "ap-northeast-2"
     default_bucket: str = ""
+    video_index_table: str = ""
 
 
 @lru_cache(maxsize=1)
@@ -26,6 +27,7 @@ def get_settings() -> Settings:
     youtube_api_key = (os.getenv("YOUTUBE_API_KEY") or "").strip()
     openai_api_key = (os.getenv("OPENAI_API_KEY") or "").strip()
     default_bucket = (os.getenv("DATA_BUCKET") or "").strip()
+    video_index_table = (os.getenv("VIDEO_INDEX_TABLE") or "").strip()
     aws_region = (os.getenv("AWS_REGION") or "ap-northeast-2").strip()
 
     missing: List[str] = []
@@ -35,6 +37,9 @@ def get_settings() -> Settings:
         missing.append("OPENAI_API_KEY")
     if not default_bucket:
         missing.append("DATA_BUCKET")
+
+    if not video_index_table:
+        missing.append("VIDEO_INDEX_TABLE")
 
     if missing:
         missing_csv = ", ".join(missing)
@@ -48,4 +53,5 @@ def get_settings() -> Settings:
         openai_api_key=openai_api_key,
         aws_region=aws_region,
         default_bucket=default_bucket,
+        video_index_table=video_index_table,
     )
